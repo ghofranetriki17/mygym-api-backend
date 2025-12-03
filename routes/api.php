@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\BranchAvailabilityController;
@@ -17,13 +18,10 @@ use App\Http\Controllers\Api\CoachAvailabilityController;
 use App\Http\Controllers\Api\GroupTrainingSessionController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Api\AdminBookingController;
-
-// Protégé par Sanctum si besoin :
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/admin/bookings', [AdminBookingController::class, 'index']);
-});
+use App\Http\Controllers\ParametreController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -69,7 +67,6 @@ Route::get('coaches/{coachId}/specialities', function($coachId) {
 });
 
 Route::get('coaches/{coachId}/availabilities', [CoachAvailabilityController::class, 'getByCoach']);
-Route::get('/coaches/{coachId}/videos', [VideoController::class, 'index']);
 
 // Group Training Session routes (public read)
 Route::get('group-training-sessions', [GroupTrainingSessionController::class, 'index']);
@@ -79,12 +76,15 @@ Route::get('coaches/{coachId}/sessions', [GroupTrainingSessionController::class,
 Route::get('sessions/upcoming', [GroupTrainingSessionController::class, 'getUpcoming']);
 Route::get('sessions/filter', [GroupTrainingSessionController::class, 'getSessionsByFilters']);
 
+// Paramètres routes publiques
+Route::get('/parametres/public', [ParametreController::class, 'public']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
-Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
+    Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
     Route::apiResource('users', UserController::class);
 
     // User Progress routes
@@ -108,6 +108,11 @@ Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
 
     // Machine management routes
     Route::apiResource('machines', MachineController::class)->except(['index', 'show']);
+    
+    // Machine charge management routes
+    Route::post('machines/{machine}/charges/{charge}', [MachineController::class, 'attachCharge']);
+    Route::delete('machines/{machine}/charges/{charge}', [MachineController::class, 'detachCharge']);
+    Route::put('machines/{machine}/charges', [MachineController::class, 'syncCharges']);
 
     // Charge routes
     Route::apiResource('charges', ChargeController::class);
@@ -119,7 +124,6 @@ Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
     Route::apiResource('programmes', ProgrammeController::class);
     Route::patch('programmes/{programme}/activate', [ProgrammeController::class, 'activate']);
 
-  
     // Exercise management routes
     Route::post('/exercises', [ExerciseController::class, 'store']);
     Route::put('/exercises/{exercise}', [ExerciseController::class, 'update']);
@@ -156,9 +160,7 @@ Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
     // Coach Availability routes
     Route::apiResource('coach-availabilities', CoachAvailabilityController::class);
 
-    // Video management routes
-    Route::post('/videos', [VideoController::class, 'store']);
-    Route::delete('/videos/{id}', [VideoController::class, 'destroy']);
+   
 
     // Group Training Session management and booking routes
     Route::apiResource('group-training-sessions', GroupTrainingSessionController::class)->except(['index', 'show']);
@@ -180,9 +182,23 @@ Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
     Route::get('/group-sessions/{sessionId}/booking-status', [GroupTrainingSessionController::class, 'checkBookingStatus']);
     Route::get('/group-sessions/{sessionId}/bookings', [GroupTrainingSessionController::class, 'getSessionBookings']);
     Route::get('/user/bookings', [GroupTrainingSessionController::class, 'getUserBookings']);
+
+    // Admin routes
+    Route::get('/admin/bookings', [AdminBookingController::class, 'index']);
+
+    // Paramètres routes protégées
+    Route::apiResource('parametres', ParametreController::class);
+    Route::post('/parametres/bulk-update', [ParametreController::class, 'bulkUpdate']);
 });
-Route::put('machines/{machine}/charges', [MachineController::class, 'syncCharges']);
-  // Movement management routes (FIXED: Now properly protected)
-    Route::post('/movements', [MovementController::class, 'store']);
-    Route::put('/movements/{movement}', [MovementController::class, 'update']);
-    Route::patch('/movements/{movement}', [MovementController::class, 'update']);
+
+// Movement management routes
+Route::post('/movements', [MovementController::class, 'store']);
+Route::put('/movements/{movement}', [MovementController::class, 'update']);
+Route::patch('/movements/{movement}', [MovementController::class, 'update']);
+// Add this inside Route::middleware('auth:sanctum')->group(function () {
+// Video management routes
+ // ---------------------- VIDEOS (PROTECTED) ----------------------
+    Route::post('/videos', [VideoController::class, 'store']);
+    Route::delete('/videos/{id}', [VideoController::class, 'destroy']);// ---------------------- VIDEOS (PUBLIC) ----------------------
+Route::get('/videos', [VideoController::class, 'getAllVideos']);
+Route::get('/coaches/{coachId}/videos', [VideoController::class, 'index']);

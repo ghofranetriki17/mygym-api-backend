@@ -9,9 +9,21 @@ use Illuminate\Support\Facades\Validator;
 
 class VideoController extends Controller
 {
+    // Get videos by specific coach (for public route)
     public function index($coachId)
     {
-        $videos = Video::where('coach_id', $coachId)->get();
+        $videos = Video::with('coach')->where('coach_id', $coachId)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $videos
+        ]);
+    }
+
+    // Get all videos (for admin panel)
+    public function getAllVideos()
+    {
+        $videos = Video::with('coach')->get();
 
         return response()->json([
             'success' => true,
@@ -25,7 +37,7 @@ class VideoController extends Controller
             'coach_id' => 'required|exists:coaches,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'video_url' => 'required|string' // or use 'file' if uploading
+            'video_url' => 'required|url' // Changed to url validation
         ]);
 
         if ($validator->fails()) {
@@ -36,6 +48,7 @@ class VideoController extends Controller
         }
 
         $video = Video::create($request->all());
+        $video->load('coach'); // Load coach relationship
 
         return response()->json([
             'success' => true,
