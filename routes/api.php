@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\GroupTrainingSessionController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AdminBookingController;
+use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\ParametreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -84,6 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/upload-image', [ImageUploadController::class, 'store']);
     Route::delete('/movements/{movement}', [MovementController::class, 'destroy']);
     Route::apiResource('users', UserController::class);
 
