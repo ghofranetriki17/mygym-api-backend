@@ -69,6 +69,39 @@ class ProgrammeController extends Controller
         return response()->json(['message' => 'Programme deleted successfully']);
     }
 
+    /**
+     * Attach or sync workouts on an existing programme.
+     */
+    public function syncWorkouts(Request $request, $programmeId)
+    {
+        $validated = $request->validate([
+            'workouts' => 'required|array',
+            'workouts.*.id' => 'required|exists:workouts,id',
+            'workouts.*.order' => 'nullable|integer|min:0',
+            'workouts.*.week_day' => 'nullable|integer|min:1|max:7',
+        ]);
+
+        // Ensure the programme exists (avoids null programme_id in pivot)
+        $programme = Programme::find($programmeId);
+        if (!$programme) {
+            return response()->json(['error' => 'Programme not found for this route'], 404);
+        }
+
+        // Build sync array with pivot attributes; default order to input position when omitted
+        $syncData = collect($validated['workouts'])->mapWithKeys(function ($workoutData, $index) {
+            return [
+                $workoutData['id'] => [
+                    'order' => $workoutData['order'] ?? $index,
+                    'week_day' => $workoutData['week_day'] ?? null,
+                ],
+            ];
+        })->all();
+
+        $programme->workouts()->sync($syncData);
+
+        return response()->json($programme->load(['user', 'workouts']));
+    }
+
     public function activate(Programme $programme)
     {
         // Deactivate other programmes for this user

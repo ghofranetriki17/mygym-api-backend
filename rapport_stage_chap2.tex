@@ -1,0 +1,168 @@
+﻿\newpage
+\pagestyle{fancy}
+\lhead{\textsc{Chapitre 2. SPÉCIFICATION DES BESOINS ET ANALYSE }}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\chapter{SPÉCIFICATION DES BESOINS ET ANALYSE}\setlength{\headheight}{27.06pt}\label{ch2}
+\minitoc
+
+\newpage
+\section{Introduction}
+La réussite du projet repose sur une compréhension claire des besoins des utilisateurs finaux. Ce chapitre décrit la phase de \textbf{spécification des besoins et d’analyse} pour la plateforme ANAS’ GYM (nom de code MyGym), composée d’une API RESTful Laravel (Sanctum) et de frontends React Native / React.
+
+Nous identifions les acteurs, leurs attentes, puis les besoins fonctionnels et non fonctionnels. Nous présentons les cas d’utilisation qui structurent les principales interactions (gestion d’entraînements, réservations de cours collectifs, suivi des progrès, administration des ressources).
+
+\section{Identification des acteurs}
+\begin{itemize}
+    \item \textbf{Membre / Client sportif (mobile)} : consulte ses séances, historise ses workouts, suit sa progression corporelle, réserve des cours collectifs, reçoit des rappels.
+    \item \textbf{Administrateur (dashboard React)} : gère les branches, paramètres publics, machines, charges, mouvements, exercices, programmes, workouts, coachs, cours collectifs, utilisateurs.
+    \item \textbf{Coach} : encadre les membres, propose des programmes, suit les progrès, gère ses disponibilités et anime des sessions collectives.
+    \item \textbf{Staff / Opérateur} : surveille l’état des équipements, assiste les membres, peut intervenir sur les disponibilités des ressources.
+\end{itemize}
+
+\section{Besoins fonctionnels}
+\subsection*{Pour le membre}
+\begin{itemize}
+    \item Consulter l’historique des entraînements (workouts) et leurs détails (mouvements, machines, charges, répétitions).
+    \item Créer un workout personnalisé avec plusieurs exercices.
+    \item Suivre ses programmes et sa progression (poids, mensurations, IMC, performances).
+    \item Réserver / annuler une séance collective et voir ses réservations futures.
+    \item Recevoir notifications/rappels (prochain cours, séance demain, progression).
+\end{itemize}
+
+\subsection*{Pour l’administrateur}
+\begin{itemize}
+    \item Gérer branches et disponibilités, paramètres publics (horaires, coordonnées, réseaux sociaux).
+    \item Créer / modifier / supprimer machines, charges, catégories, mouvements, exercices.
+    \item Gérer programmes, workouts, cours collectifs (sessions), et leurs capacités.
+    \item Gérer les utilisateurs (clients, coachs, staff) et leurs rôles.
+\end{itemize}
+
+\subsection*{Pour le coach}
+\begin{itemize}
+    \item Définir des programmes adaptés aux membres suivis.
+    \item Gérer ses disponibilités et les sessions collectives qu’il anime.
+    \item Consulter les workouts et progrès des membres pour ajuster l’accompagnement.
+\end{itemize}
+
+\subsection*{Pour le staff}
+\begin{itemize}
+    \item Surveiller l’état des machines/charges et signaler les indisponibilités.
+    \item Aider les membres à créer ou modifier leurs workouts et à réserver des sessions.
+\end{itemize}
+
+\section{Besoins non fonctionnels}
+\begin{itemize}
+    \item \textbf{Performance} : réponses API rapides, listes paginées pour gros volumes (workouts, réservations).
+    \item \textbf{Sécurité} : tokens Sanctum, mots de passe hachés, contrôle d’accès par rôle, validation stricte des données.
+    \item \textbf{Fiabilité} : cohérence des données (workouts, réservations, capacités des sessions), sauvegarde et historisation.
+    \item \textbf{Ergonomie} : interfaces intuitives mobile et desktop, navigation claire, feedback utilisateur.
+    \item \textbf{Scalabilité} : API REST permettant d’ajouter des modules (ex. suivi nutritionnel) sans refonte.
+    \item \textbf{Traçabilité} : journalisation des opérations sensibles (création/suppression de ressources, réservations).
+\end{itemize}
+
+\section{Langage de modélisation}
+La modélisation s’appuie sur \textbf{UML} (StarUML) pour représenter cas d’utilisation, classes et interactions.
+\begin{figure}[H]
+\centering 
+     \includegraphics[width=0.2\linewidth]{images/uml.png}
+   \caption{StarUML}
+   \label{fig:StarUML}
+\end{figure}
+
+\section{Diagramme de cas d’utilisation}
+Le diagramme général des cas d’utilisation de la plateforme sportive est illustré ci-dessous :
+\begin{figure}[H]
+\centering 
+     \includegraphics[width=1\linewidth]{images/Diagramme_cas_utilisation.png}
+   \caption{Diagramme de cas d'utilisation de la plateforme sportive}
+   \label{fig:DiagrammeCas}
+\end{figure}
+
+\section{Exemples de cas d’utilisation}
+\subsection{Créer un workout}
+\begin{table}[H]
+\caption{Description du cas d'utilisation "Créer un workout"}
+\label{tab_workout}
+\begin{center}
+\begin{tabular}{|m{4cm}|m{12cm}|}
+\hline
+Titre & Créer un workout \\
+\hline
+Acteurs & Membre (client sportif) \\
+\hline
+Précondition & L’utilisateur est authentifié. \\
+\hline
+Scénario nominal & 1) Accéder à "Workouts". 2) Choisir "Créer". 3) Sélectionner machines, charges, mouvements, définir séries/répétitions. 4) Enregistrer. \\
+\hline
+Postcondition & Le workout est sauvegardé et visible dans l’historique. \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Gérer les utilisateurs}
+\begin{table}[H]
+\caption{Description du cas d'utilisation "Gérer les utilisateurs"}
+\label{tab_users}
+\begin{center}
+\begin{tabular}{|m{4cm}|m{12cm}|}
+\hline
+Titre & Gérer les utilisateurs \\
+\hline
+Acteurs & Administrateur \\
+\hline
+Précondition & Administrateur authentifié. \\
+\hline
+Scénario nominal & 1) Ouvrir "Utilisateurs". 2) Lister les comptes. 3) Ajouter / modifier / supprimer un utilisateur et son rôle. \\
+\hline
+Postcondition & La base utilisateurs est mise à jour. \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Réserver une séance collective}
+\begin{table}[H]
+\caption{Description du cas d'utilisation "Réserver une séance collective"}
+\label{tab_booking}
+\begin{center}
+\begin{tabular}{|m{4cm}|m{12cm}|}
+\hline
+Titre & Réserver une séance collective \\
+\hline
+Acteurs & Membre (client sportif) \\
+\hline
+Précondition & Utilisateur authentifié ; session avec places disponibles. \\
+\hline
+Scénario nominal & 1) Consulter le planning des sessions. 2) Sélectionner une séance. 3) Confirmer la réservation. 4) Recevoir confirmation/rappel. \\
+\hline
+Postcondition & La réservation est enregistrée et visible dans "Mes réservations" ; la capacité est décrémentée. \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Suivre la progression}
+\begin{table}[H]
+\caption{Description du cas d'utilisation "Suivre la progression"}
+\label{tab_progress}
+\begin{center}
+\begin{tabular}{|m{4cm}|m{12cm}|}
+\hline
+Titre & Suivre la progression \\
+\hline
+Acteurs & Membre, Coach \\
+\hline
+Précondition & Utilisateur authentifié ; données de workouts et mesures enregistrées. \\
+\hline
+Scénario nominal & 1) Accéder à "Progression". 2) Visualiser les workouts, charges utilisées, mesures corporelles et graphiques. 3) Le coach peut adapter le programme en conséquence. \\
+\hline
+Postcondition & La progression est consultée et exploitée pour ajuster l’entraînement. \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Conclusion}
+Nous avons identifié les acteurs, leurs besoins fonctionnels et non fonctionnels, et détaillé les principaux cas d’utilisation (workouts, gestion utilisateurs, réservations, progression). Cette base servira à la conception de l’architecture technique et à la modélisation détaillée développées au chapitre suivant.

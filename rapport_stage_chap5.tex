@@ -1,0 +1,53 @@
+﻿\newpage
+\pagestyle{fancy}
+\lhead{\textsc{Chapitre 5. Release 2 : Développement et déploiement de l’application web}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\chapter{Release 2 : Développement et déploiement de l’application web}\setlength{\headheight}{27.06pt}\label{ch5}
+\minitoc
+\newpage
+
+\section{Introduction}
+Cette release couvre le développement et le déploiement du dashboard web ANAS’ GYM (React) adossé à l’API Laravel. L’objectif est d’offrir aux administrateurs et staff une interface unifiée pour gérer branches, coachs, machines, charges, mouvements, exercices, programmes, séances collectives et utilisateurs, avec un pipeline CI/CD simple pour livrer rapidement les évolutions.
+
+\section{Développement de l’application}
+Le dashboard React consomme l’API Laravel (Sanctum) et propose les écrans suivants :
+\begin{itemize}
+    \item \textbf{Authentification} : page de login sécurisée pour administrateurs/staff.
+    \item \textbf{Utilisateurs} : tableau de gestion (clients, coachs, staff), création/édition/suppression, affectation des rôles.
+    \item \textbf{Branches et coachs} : vue des salles, disponibilités (BranchAvailability), listing des coachs, spécialités et créneaux (CoachAvailability).
+    \item \textbf{Machines et charges} : gestion des machines par salle, charges associées, catégories et mouvements liés aux exercices.
+    \item \textbf{Workouts/Programmes} : création et suivi des workouts, rattachement aux programmes (ProgrammeWorkout), consultation des progrès (UserProgress).
+    \item \textbf{Séances collectives} : planification (GroupTrainingSession), capacités, réservations, flags femmes/enfants/gratuit, suivi des bookings.
+    \item \textbf{Paramètres publics} : app\_name, horaires, coordonnées, réseaux sociaux (\texttt{/parametres/public}).
+    \item \textbf{Journaux simples} : retours API et états des jobs (listes paginées, filtres).
+\end{itemize}
+Des tableaux, filtres et cartes (pour les branches) facilitent la navigation. Les formulaires valident les formats (dates, capacités, horaires) avant envoi.
+
+\section{Intégration et déploiement (CI/CD)}
+\begin{itemize}
+    \item \textbf{Pipeline} : déclenchée sur la branche principale après merge. Étapes typiques :
+    \begin{itemize}
+        \item Install \& build front (`npm ci` + `npm run build`).
+        \item Tests linters de base (si activés).
+        \item Image Docker construite puis poussée sur un registre (Docker Hub ou GitLab Registry).
+    \end{itemize}
+    \item \textbf{Runner} : GitLab Runner (VM Linux) exécute les jobs CI.
+    \item \textbf{Déploiement} :
+    \begin{itemize}
+        \item \textit{Option conteneur} : déploiement de l’image sur un serveur (Docker) ou un cluster (Kubernetes) via manifeste `deployment.yaml` (réplicas, ports, service/load balancer).
+        \item \textit{Option serveur web classique} : copie du build statique vers le dossier public (Nginx/Apache) avec invalidation de cache.
+    \end{itemize}
+    \item \textbf{Artifacts et logs} : export des logs de build et de déploiement, conservation des artefacts de build pour inspection rapide.
+\end{itemize}
+
+\section{Points techniques clés}
+\begin{itemize}
+    \item \textbf{Sécurité} : appels API avec jeton Sanctum, gestion des rôles (admin, coach, staff, client), validation côté front et back.
+    \item \textbf{Performance} : pagination des listes (utilisateurs, machines, sessions), cache HTTP pour les assets buildés, minification via build React.
+    \item \textbf{Médias} : images servies depuis `public/storage` (\texttt{php artisan storage:link}), champs image dans les formulaires (coach/machine/bannière).
+    \item \textbf{Observabilité} : logs API (statuts, erreurs), surveillance des jobs CI/CD, vérification post-déploiement (smoke test des endpoints principaux : /branches, /coaches, /group-sessions/upcoming, /parametres/public).
+\end{itemize}
+
+\section{Conclusion}
+Cette release met en place un dashboard React opérationnel et une chaîne de déploiement industrialisée : build, image, publication et déploiement orchestré. Les administrateurs disposent d’outils complets pour piloter les ressources (branches, coachs, machines, programmes, séances collectives) et alimenter les applications clients (mobile et web) avec des données fiables. Les prochaines itérations pourront renforcer l’analytique (filtres par période, reporting), la supervision (monitoring temps réel) et la couverture de tests end-to-end.

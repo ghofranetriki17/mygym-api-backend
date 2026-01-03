@@ -1,0 +1,68 @@
+﻿\newpage
+\pagestyle{fancy}
+\lhead{\textsc{Chapitre 4. Release 1 : Génération et Traitement des Données}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\chapter{Release 1 : Génération et Traitement des Données}\setlength{\headheight}{27.06pt}\label{ch4}
+\minitoc
+\newpage
+
+\section{Introduction}
+Cette release couvre l’alimentation initiale du système ANAS’ GYM et le traitement des données exposées par l’API Laravel. L’objectif est d’obtenir un socle fiable : données cohérentes (branches, coachs, machines, séances collectives, workouts), fichiers médias servis via storage public, et indicateurs exploitables côté mobile (React Native) et dashboard (React).
+
+\section{Génération et alimentation des données}
+\subsection*{\textbullet\ Migrations et seeders}
+Nous avons créé et exécuté les migrations pour l’ensemble du domaine : branches, disponibilités, machines, charges, catégories, mouvements, exercices, programmes, workouts, coachs, séances collectives (group\_training\_sessions), réservations (group\_session\_bookings), paramètres publics et user\_progresses. Les seeders/factories Laravel ont été utilisés pour :
+\begin{itemize}
+    \item Générer des branches avec leurs disponibilités (BranchAvailability).
+    \item Créer des machines reliées aux charges et catégories.
+    \item Créer des coachs, leurs disponibilités et leurs spécialités.
+    \item Alimenter des séances collectives (dates futures, capacités, flags femmes/enfants/gratuit).
+    \item Remplir des workouts et programmes pour les comptes de test.
+\end{itemize}
+
+\subsection*{\textbullet\ Médias et stockage}
+Les images (machines, coachs, bannières) sont stockées via le disque public Laravel. La commande \texttt{php artisan storage:link} expose \texttt{storage/app/public} sous \texttt{public/storage}, permettant au mobile et au dashboard d’afficher les médias. Les endpoints d’upload (\texttt{/upload-image}) sont protégés par Sanctum.
+
+\subsection*{\textbullet\ Paramètres publics}
+L’API \texttt{/parametres/public} diffuse les informations de marque (app\_name, welcome\_message, horaires, coordonnées, réseaux sociaux, textes d’accueil). Ces données alimentent l’écran d’accueil mobile et certaines sections du dashboard.
+
+\section{Traitement et exposition des données}
+\subsection*{\textbullet\ Endpoints clés}
+\begin{itemize}
+    \item Branches et disponibilités : \texttt{/branches}, \texttt{/branches/{id}/availabilities}.
+    \item Machines et charges : \texttt{/machines}, \texttt{/branches/{id}/machines}, \texttt{/machines/{id}/charges}.
+    \item Coachs et spécialités : \texttt{/coaches}, \texttt{/coaches/{id}/specialities}, \texttt{/coaches/{id}/availabilities}.
+    \item Séances collectives : \texttt{/sessions/upcoming}, \texttt{/branches/{id}/sessions}, \texttt{/group-sessions/{id}/book}, \texttt{/user/bookings}.
+    \item Workouts/programmes : \texttt{/workouts}, \texttt{/programmes}, gestion des pivots (workout\_exercises, programme\_workouts).
+    \item Suivi : \texttt{/user-progresses}, \texttt{/user-progresses/history}.
+\end{itemize}
+
+\subsection*{\textbullet\ Nettoyage et cohérence}
+\begin{itemize}
+    \item Validation côté backend (FormRequests) pour s’assurer des formats (dates, capacités, flags booléens, rôles).
+    \item Contrôles sur les capacités des sessions : une réservation décrémente la capacité et interdit le double booking du même utilisateur (pivot group\_session\_bookings).
+    \item Casts et dates (\texttt{session\_date}, \texttt{opening\_hour}, \texttt{closing\_hour}) pour un formatage cohérent côté front.
+\end{itemize}
+
+\section{Analyse et indicateurs (Release 1)}
+Pour le tableau de bord initial (React), les indicateurs calculés à partir des endpoints sont :
+\begin{itemize}
+    \item Nombre de membres actifs (comptes utilisateurs existants).
+    \item Réservations totales et à venir (\texttt{/user/bookings} côté membre, \texttt{/admin/bookings} côté admin).
+    \item Répartition des sessions par type (femmes/enfants/gratuit) et par branche.
+    \item Disponibilités des branches (jours/horaires) et des coachs (créneaux).
+\end{itemize}
+Ces données alimentent les cartes et graphiques (barres, secteurs, courbes) du dashboard.
+
+\section{Modèles et flux de données}
+Les modèles décrits au chapitre 3 (Branch, Coach, Machine, Charge, Category, Movement, Exercise, Workout, Programme, GroupTrainingSession, UserProgress, Parametre) structurent les flux :
+\begin{itemize}
+    \item Réservation d’une séance : User \(\leftrightarrow\) GroupTrainingSession via pivot (booked\_at, timestamps).
+    \item Suivi des workouts : Workout \(\leftrightarrow\) Exercise via pivot (achievement, is\_done, order) et rattachement à Programme (programme\_workouts).
+    \item Disponibilités : BranchAvailability et CoachAvailability pour le calcul des fenêtres d’ouverture et des créneaux coach.
+    \item Paramètres publics : exposés sans authentification pour les écrans d’accueil (mobile/web).
+\end{itemize}
+
+\section{Conclusion}
+Cette release a posé le socle de données : migrations, seeders, exposition API, cohérence des réservations et des workouts, mise à disposition des médias et des paramètres publics. Les fronts (mobile React Native et dashboard React) consomment ces endpoints pour afficher branches, coachs, machines, séances collectives et indicateurs. Les releases suivantes pourront enrichir l’analytique (statistiques avancées, filtrage par période), ajouter le suivi nutritionnel et renforcer les contrôles métier (capacités, pénalités d’annulation).

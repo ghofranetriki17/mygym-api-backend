@@ -1,0 +1,79 @@
+﻿Rapport de stage – Notes projet (anaspluspfaete)
+================================================
+Stack et périmètre
+- Backend Laravel (Sanctum pour auth API), MySQL, routes exposées via routes/api.php.
+- Modules principaux : branches & disponibilités, machines/charges/catégories, coaches & spécialités, séances collectives (group training), programmes/workouts/exercices/mouvements, suivi UserProgress, paramètres site/public, upload image.
+- Fronts connus : react-admin-dashboard (admin) + apps mobiles (React Native) qui consomment ces API.
+
+Routes clés (condensé)
+- Auth public : POST /register, /login. Auth protégé : POST /logout, GET /user.
+- Branches : apiResource /branches (+ /coaches, /availabilities/{day}, machines par branch). BranchAvailability CRUD protégé.
+- Machines : GET /machines, /branches/{id}/machines (public). CRUD protégé, charges attach/detach/sync.
+- Catalogues : categories (public index/show, CRUD protégé), movements & exercises (public read, protected write), charges CRUD protégé.
+- Coaches : GET /coaches, /coaches/{id}/specialities, /coaches/{id}/availabilities; CRUD protégé; spécialités via pivot coach_specialities.
+- Group sessions : public GET /group-training-sessions, /branches/{id}/sessions, /coaches/{id}/sessions, /sessions/upcoming, /sessions/filter; protégé CRUD + bookings (/sessions/{id}/book|cancel, /user/bookings, /group-sessions/{id}/bookings ...).
+- Workouts/programmes : apiResource workouts, add/remove exercise, update pivot, apiResource programmes (+ activate), user-progresses CRUD/history.
+- Paramètres : GET /parametres/public public; apiResource /parametres protégé + /parametres/bulk-update.
+- Vidéos : POST/DELETE protégés, GET /videos public, GET /coaches/{id}/videos.
+
+Modèle de données (résumé)
+- Branch 1..* BranchAvailability, 1..* Machine, 1..* Coach, 1..* GroupTrainingSession.
+- Machine *..* Charge (machine_charges), *..* Category (machine_categories).
+- Coach 1..* CoachAvailability, *..* Speciality (coach_specialities), 1..* GroupTrainingSession, 1..* Video, belongsTo Branch.
+- GroupTrainingSession belongsTo Branch, Coach, Course; *..* User via group_session_bookings (pivot booked_at); attrs is_for_women/kids/free, max_participants.
+- User *..* UserProgress; *..* GroupTrainingSession (bookings); 1..* Workout; 1..* Programme.
+- Workout *..* Exercise via workout_exercises (pivot achievement/is_done/order); *..* Programme via programme_workouts (order, week_day).
+- Exercise belongsTo Movement, Machine, Charge; 1..* WorkoutExercise.
+- Programme 1..* ProgrammeWorkout; belongsTo User.
+- Course 1..* GroupTrainingSession.
+
+Diagramme de classe (PlantUML à copier dans LaTeX ou VSCode PlantUML)
+@startuml
+class Branch {name, address, city, phone, email}
+class BranchAvailability {day_of_week, opening_hour, closing_hour, is_closed}
+class Machine {name, type, description, image_url, video_url}
+class Charge {weight}
+class Category {name, description}
+class Coach {name, email, phone, bio, rating, branch_id}
+class CoachAvailability {day_of_week, start_time, end_time, is_available}
+class Speciality {name, description}
+class Course {name, description}
+class GroupTrainingSession {title, session_date, duration, is_for_women, is_for_kids, is_free, max_participants}
+class User {name, email, role, password}
+class UserProgress {weight, height, body_fat, muscle_mass, imc, recorded_at}
+class Movement {name, description, media_url}
+class Exercise {name, sets, reps, instructions, machine_id, movement_id, charge_id}
+class Workout {title, notes, duration, is_rest_day, water_consumption}
+class Programme {title, objectif, description, duration_weeks, is_active}
+class Video {title, description, video_url}
+
+Branch --> "*" BranchAvailability
+Branch --> "*" Machine
+Branch --> "*" Coach
+Branch --> "*" GroupTrainingSession
+Machine "*" -- "*" Charge : machine_charges
+Machine "*" -- "*" Category : machine_categories
+Coach --> Branch
+Coach --> "*" CoachAvailability
+Coach "*" -- "*" Speciality : coach_specialities
+Coach --> "*" GroupTrainingSession
+Coach --> "*" Video
+GroupTrainingSession --> Branch
+GroupTrainingSession --> Coach
+GroupTrainingSession --> Course
+GroupTrainingSession "*" -- "*" User : group_session_bookings
+User --> "*" UserProgress
+User --> "*" Workout
+User --> "*" Programme
+Workout "*" -- "*" Exercise : workout_exercises
+Programme "*" -- "*" Workout : programme_workouts
+Exercise --> Movement
+Exercise --> Machine
+Exercise --> Charge
+Course --> "*" GroupTrainingSession
+@enduml
+
+Notes pour mise en forme LaTeX
+- Insérer le bloc PlantUML ci-dessus dans \begin{plantuml}...\end{plantuml} (avec package plantuml) ou générer l’image puis l’inclure.
+- Ajouter sections : Contexte, Architecture API, Sécurité (Sanctum), Modules métiers (branches, coaches, séances, équipements, suivi utilisateur), Flux principaux (booking de session, gestion programme/workout), et gouvernance (paramètres site/public, upload images).
+- Mettre en annexe les routes (reprendre le condensé ci-dessus) et le diagramme.

@@ -1,0 +1,95 @@
+﻿\newpage
+\pagestyle{fancy}
+\lhead{\textsc{Chapitre 3. Étude conceptuelle}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\chapter{Étude conceptuelle}\setlength{\headheight}{27.06pt}\label{ch3}
+\minitoc
+\newpage
+
+\section{Introduction}
+Dans le cadre de mon stage d'été chez \textbf{ExaDev}, j'ai travaillé sur le développement d'une application mobile et web multi-sites pour les salles de sport. L'objectif est de permettre aux membres de suivre leurs programmes d'entraînement, réserver des cours collectifs et visualiser leur progression, tout en donnant aux gestionnaires un outil centralisé de supervision.
+
+L'application adresse plusieurs difficultés : absence d'historique des séances et des mesures physiques, oubli des cours collectifs (ex. Zumba), manque d'information sur la disponibilité des coachs et sur les machines par local. Ce chapitre présente l'architecture globale, les technologies utilisées et les principaux diagrammes conceptuels qui structurent le système.
+
+\section{Outils et frameworks}
+\begin{itemize}
+    \item \textbf{Laravel (API REST)} : logique métier, accès BD, sécurisation via Sanctum, gestion des ressources (branches, machines, charges, mouvements, exercices, programmes, coachs, sessions collectives, réservations).
+    \item \textbf{React Native + Expo} : application mobile (iOS/Android) pour les membres (réservations, suivi, notifications), testée avec Expo Go.
+    \item \textbf{React} : dashboard administrateur (gestion des branches, coachs, machines, cours collectifs, utilisateurs, paramètres publics).
+    \item \textbf{MySQL} : base de données centralisée en production (historique workouts, mesures, réservations, paramètres). 
+    \item \textbf{VS Code} : IDE principal, sans template prédéfini.
+\end{itemize}
+
+\section{Architecture du projet}
+L'architecture s'articule autour de plusieurs composants coopérants.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/architecture_gym.png}
+    \caption{Architecture globale de l'application}
+    \label{fig:architecture-gym}
+\end{figure}
+
+\subsubsection*{Backend Laravel}
+Expose des API REST sécurisées (Sanctum) pour gérer utilisateurs, branches, coachs, machines, charges, mouvements, exercices, programmes, séances collectives et réservations. Assure la cohérence métier (capacités de sessions, rôles, historiques).
+
+\subsubsection*{Frontend React Native}
+Application membre :
+\begin{itemize}
+    \item Consultation des programmes et workouts historisés.
+    \item Réservation / annulation de cours collectifs (femmes/enfants/gratuits).
+    \item Visualisation des coachs (disponibilités, spécialités) et des machines par local.
+    \item Notifications (rappels de séance, session demain, réservation confirmée).
+\end{itemize}
+
+\subsubsection*{Dashboard React}
+Interface administrateur :
+\begin{itemize}
+    \item Gestion des branches et paramètres publics (horaires, coordonnées, réseaux sociaux).
+    \item Gestion des machines, charges, catégories, mouvements et exercices.
+    \item Planification et suivi des séances collectives (capacités, types femmes/enfants/gratuit).
+    \item Gestion des coachs et des utilisateurs (rôles).
+\end{itemize}
+
+\subsubsection*{Base de données}
+MySQL centralise utilisateurs, rôles, workouts, exercices, mouvements, charges, machines, programmes, coachs, disponibilités, sessions collectives, réservations, paramètres publics. Elle assure l'historisation et la cohérence (capacités, disponibilités).
+
+\section{Diagramme de classes}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{images/diagramme_gym.png}
+\caption{Diagramme de classes principal}
+\label{fig:diagramme_classe_gym}
+\end{figure}
+
+Classes clés et relations (alignées sur le backend Laravel) :
+\begin{itemize}
+    \item \texttt{Branch} 1..* \texttt{BranchAvailability}, 1..* \texttt{Machine}, 1..* \texttt{Coach}, 1..* \texttt{GroupTrainingSession}.
+    \item \texttt{Machine} *..* \texttt{Charge} (machine\_charges), *..* \texttt{Category} (machine\_categories).
+    \item \texttt{Coach} *..* \texttt{Speciality} (coach\_specialities), 1..* \texttt{CoachAvailability}, 1..* \texttt{GroupTrainingSession}, 1..* \texttt{Video}.
+    \item \texttt{GroupTrainingSession} belongsTo \texttt{Branch}, \texttt{Coach}, \texttt{Course}; *..* \texttt{User} via bookings (group\_session\_bookings) avec capacité.
+    \item \texttt{User} 1..* \texttt{Workout}, 1..* \texttt{Programme}, *..* \texttt{GroupTrainingSession} (bookings), 1..* \texttt{UserProgress}.
+    \item \texttt{Workout} *..* \texttt{Exercise} (workout\_exercises avec achievement/is\_done/order).
+    \item \texttt{Programme} *..* \texttt{Workout} (programme\_workouts avec order/week\_day).
+    \item \texttt{Exercise} belongsTo \texttt{Movement}, \texttt{Machine}, \texttt{Charge}.
+    \item \texttt{Course} 1..* \texttt{GroupTrainingSession}.
+\end{itemize}
+
+\section{Diagrammes de Use Case}
+Les interactions principales couvrent :
+\begin{itemize}
+    \item Côté membre : consulter programmes/workouts, réserver une séance collective, suivre progression et mesures, voir coachs/machines.
+    \item Côté coach : consulter progrès des membres, proposer programmes, gérer disponibilités et sessions.
+    \item Côté administrateur : gérer ressources (branches, coachs, machines, charges, mouvements, exercices, programmes), gérer paramètres publics et utilisateurs.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{images/usecase_gym.png}
+\caption{Diagramme de Use Case}
+\label{fig:usecase_gym}
+\end{figure}
+
+\section{Conclusion}
+Ce chapitre a présenté l'étude conceptuelle : choix technologiques, architecture globale, et modèles structurants (classes et use cases) alignés sur l’API Laravel et les frontends React/React Native. Cette base guide l’implémentation pour garantir cohérence des données, historisation, réservation fiable des cours collectifs et gestion multi-sites.

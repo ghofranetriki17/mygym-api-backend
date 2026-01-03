@@ -125,6 +125,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Programme routes
     Route::apiResource('programmes', ProgrammeController::class);
     Route::patch('programmes/{programme}/activate', [ProgrammeController::class, 'activate']);
+    Route::match(['post', 'put'], 'programmes/{programme}/workouts', [ProgrammeController::class, 'syncWorkouts'])
+        ->whereNumber('programme');
 
     // Exercise management routes
     Route::post('/exercises', [ExerciseController::class, 'store']);

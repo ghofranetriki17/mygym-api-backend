@@ -1,0 +1,128 @@
+﻿\newpage
+\pagestyle{fancy}
+\lhead{\textsc{Chapitre 1. ETUDE PREALABLE}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\chapter{ETUDE PREALABLE}\setlength{\headheight}{27.06pt}
+\label{ch1}
+\minitoc
+
+\newpage
+\section{Introduction}
+Ce chapitre présente le projet à travers plusieurs axes : l’organisme d’accueil (ExaDev), l’application mobile **ANAS’ GYM** (nom de code : MyGym), les concepts et technologies mobilisés (React Native/Expo, React, API Laravel avec Sanctum), ainsi que le cadre méthodologique retenu.
+
+Nous décrivons d’abord l’entreprise ExaDev, son organigramme et le pôle développement où s’est déroulé le stage. Nous rappelons ensuite les notions clés du projet : développement mobile et web, architecture client-serveur, et les technologies utilisées.
+
+Nous analysons ensuite le cadre général du projet : problèmes rencontrés par les membres des salles (absence d’historisation des entraînements, perte de données corporelles, difficulté de réservation des cours collectifs, manque d’accès aux informations coachs/équipements, multi-sites non centralisés) et motivations. Une courte étude des solutions existantes met en avant leurs limites pour le contexte local.
+
+Enfin, nous présentons la solution proposée : une application mobile pour les membres et un tableau de bord administrateur centralisé, avec historisation des séances, suivi corporel, gestion des cours collectifs et consultation coachs/équipements. Nous exposons aussi la méthodologie de travail inspirée de Scrum.
+
+\section{Présentation générale de l’organisme d’accueil}
+\subsection{Présentation de l’entreprise ExaDev}
+ExaDev (créée le 30/12/2018, Sfax) fournit des services IT : installation, externalisation, solutions hébergées, transformation digitale et optimisation des processus métier.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{images/Logo_ExaDev.png}
+    \caption{Logo de l'entreprise ExaDev}
+\end{figure}
+
+\subsection{Services proposés}
+\begin{itemize}
+    \item \textbf{Graphisme et Design} : identités visuelles, ergonomie et design d’interfaces, UX/UI.
+    \item \textbf{Développement Web} : sites vitrines responsives, e-commerce, apps web sur mesure.
+    \item \textbf{Développement mobile} : apps iOS/Android, apps métiers, maintenance et support.
+    \item \textbf{Solutions et accompagnement} : conseil en transformation digitale, externalisation IT, ERP et cloud.
+\end{itemize}
+
+\subsection{Localisation}
+ExaDev est située à Sfax : Avenue de la Liberté, Immeuble Ayda, 1er étage, N°105, Sfax 3000, Tunisie.
+
+\subsection{Organigramme}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/Organigramme_ExaDev.png}
+    \caption{Organigramme de l’entreprise ExaDev}
+\end{figure}
+Le projet s’est déroulé au pôle développement, avec l’appui du support et du design pour l’UX/UI.
+
+\subsection{Concepts de base : Développement mobile et web}
+\begin{itemize}
+    \item \textbf{React Native + Expo} : mobile multiplateforme avec tests temps réel.
+    \item \textbf{React} : dashboard administrateur web.
+    \item \textbf{Laravel + Sanctum} : API sécurisée (auth, réservations, entraînements, paramètres publics).
+\end{itemize}
+Intérêts : historisation et suivi, gestion centralisée multi-locaux, réservation/notifications, accessibilité/ergonomie.
+
+\subsubsection*{Domaines d’application}
+\begin{itemize}
+    \item Historisation des entraînements (mouvements, machines, charges, séries/répétitions).
+    \item Suivi corporel (poids, mensurations, graphiques).
+    \item Gestion coachs et cours (disponibilités, spécialités, réservations collectives ou individuelles).
+    \item Gestion multi-locaux et équipements (fiches machines/mouvements).
+\end{itemize}
+
+\section{Cadre général du projet}
+\subsection{Problématique et motivation}
+Manque de centralisation (adhérents, coachs, machines, cours), absence de suivi personnalisé (historique entraînements/mesures), organisation complexe des cours collectifs, ergonomie limitée de solutions existantes. Conséquences : perte de temps, erreurs de planification, adoption faible.
+
+\subsection{Étude de l’existant}
+Exemples : Deciplus (centralisation/planning mais ergonomie limitée), MyClub (réservations simples mais peu de suivi sportif), PerfectGym (riche mais coûteux/complexe pour petites salles). Limites : coût, personnalisation réduite, inadéquation locale.
+
+\subsection{Solution proposée : ANAS’ GYM / MyGym}
+\begin{itemize}
+    \item Gestion adhérents et historiques.
+    \item Suivi entraînements et charges, suivi corporel avec graphiques.
+    \item Gestion coachs (spécialités, disponibilités) et cours collectifs (planning, réservations, sessions femmes/enfants/gratuites).
+    \item Multi-salles via tableau de bord centralisé.
+    \item Notifications/rappels pour réservations et entraînements.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/architecture_mygym.png}
+    \caption{Architecture de la solution}
+    \label{fig:architecture}
+\end{figure}
+
+\section{Méthodologie de travail}
+Méthode agile \textbf{Scrum} (livraisons incrémentales, flexibilité, interaction continue).
+\begin{itemize}
+    \item \textbf{Product Owner} : Mme Syrine Khmirie.
+    \item \textbf{Équipe de développement} : stagiaire (moi-même).
+    \item \textbf{Scrum Master} : M. Helmi Ben Mahfoudh.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/methode-scrum.jpg}
+    \caption{Processus SCRUM}
+    \label{fig:Processus SCRUM}
+\end{figure}
+
+\subsection{Planification des sprints}
+\begin{longtable}{|m{3cm}|m{8cm}|m{4cm}|}
+\caption{Planification des sprints}\label{planification_sprints} \\
+\hline
+\textbf{Sprint} & \textbf{Tâches principales} & \textbf{Durée} \\
+\hline
+\endfirsthead
+\multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- suite}} \\
+\hline
+\textbf{Sprint} & \textbf{Tâches principales} & \textbf{Durée} \\
+\hline
+\endhead
+\hline \multicolumn{3}{|r|}{{Suite à la page suivante}} \\ \hline
+\endfoot
+\hline
+\endlastfoot
+
+Sprint 0 & Environnement (Laravel, React Native, React), dépôt Git et structure projet. & 5–16 Février \\ \hline
+Sprint 1 & Modélisation BD (utilisateurs, salles, machines, charges, exercices, programmes, coachs), migrations/seeders. & 17 Février–1 Mars \\ \hline
+Sprint 2 & API Laravel (auth, utilisateurs, machines, charges, mouvements, workouts, programmes), tests API. & 2–15 Mars \\ \hline
+Sprint 3 & Front mobile React Native : AuthScreen (login/register), stockage token ; écran Workouts (liste/creation). & 16–31 Mars \\ \hline
+Sprint 4 & Écran BranchDetailScreen (salles, coachs, sessions collectives), cartes et design. & 1–15 Avril \\ \hline
+Sprint 5 & Dashboard React Admin (gestion utilisateurs, réservations, progression), intégration API. & 16–30 Avril \\ \hline
+Sprint 6 & Tests, corrections, intégration finale ; documentation technique et fonctionnelle. & 1–15 Mai \\ \hline
+\end{longtable}
+
+\section{Conclusion}
+Ce chapitre a posé le cadre du projet (contexte, organisme, problématique, solution) et la méthode Scrum adoptée. Les sprints successifs ont jalonné l’API Laravel, l’app mobile React Native et le dashboard React. Le chapitre suivant détaillera l’analyse et la spécification des besoins fonctionnels et techniques.
