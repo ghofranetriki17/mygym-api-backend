@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Programme;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProgrammeController extends Controller
 {
@@ -87,17 +88,17 @@ class ProgrammeController extends Controller
             return response()->json(['error' => 'Programme not found for this route'], 404);
         }
 
-        // Build sync array with pivot attributes; default order to input position when omitted
-        $syncData = collect($validated['workouts'])->mapWithKeys(function ($workoutData, $index) {
-            return [
-                $workoutData['id'] => [
-                    'order' => $workoutData['order'] ?? $index,
-                    'week_day' => $workoutData['week_day'] ?? null,
-                ],
-            ];
-        })->all();
+        DB::transaction(function () use ($programme, $validated) {
+            // Clear current links, then re-insert everything (duplicates allowed)
+            $programme->workouts()->detach();
 
-        $programme->workouts()->sync($syncData);
+            foreach ($validated['workouts'] as $index => $workoutData) {
+                $programme->workouts()->attach($workoutData['id'], [
+                    'order' => $workoutData['order'] ?? $index + 1,
+                    'week_day' => $workoutData['week_day'] ?? null,
+                ]);
+            }
+        });
 
         return response()->json($programme->load(['user', 'workouts']));
     }

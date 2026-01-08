@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class VideoController extends Controller
@@ -37,7 +38,7 @@ class VideoController extends Controller
             'coach_id' => 'required|exists:coaches,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'video_url' => 'required|url' // Changed to url validation
+            'video_file' => 'required|file|mimes:mp4,mov,avi,wmv,flv,mkv,webm,mpeg,mpg|max:204800',
         ]);
 
         if ($validator->fails()) {
@@ -47,14 +48,22 @@ class VideoController extends Controller
             ], 422);
         }
 
-        $video = Video::create($request->all());
-        $video->load('coach'); // Load coach relationship
+        $path = $request->file('video_file')->store('videos', 'public');
+        $videoUrl = Storage::url($path);
+
+        $video = Video::create([
+            'coach_id' => $request->coach_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'video_url' => $videoUrl,
+        ]);
+        $video->load('coach');
 
         return response()->json([
             'success' => true,
             'message' => 'Video uploaded successfully',
             'data' => $video
-        ]);
+        ], 201);
     }
 
     public function destroy($id)
